@@ -22,8 +22,10 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+set -ue
+
 ROS_DISTRO=${ROS_DISTRO:-indigo}
-ROS_INSTALL_DIR=${ROS_INSTALL_DIR:${HOME}/local/ros}
+ROS_INSTALL_DIR=${ROS_INSTALL_DIR:-${HOME}/local/ros}
 
 do_install()
 {
@@ -76,15 +78,16 @@ do_install()
 
   # Clean out or create the install directory.
   if [ -d ${ROS_INSTALL_DIR} ]; then
-    rm -rf ${ROS_INSTALL_DIR}/*
+    mv -v ${ROS_INSTALL_DIR} ${ROS_INSTALL_DIR}.$(date +%F)
   else
-    echo "This sudo prompt is to create and chown ${ROS_INSTALL_DIR}."
-    sudo mkdir -p ${ROS_INSTALL_DIR}
-    sudo chown $USER ${ROS_INSTALL_DIR}
+    # echo "This sudo prompt is to create and chown ${ROS_INSTALL_DIR}."
+    mkdir -p ${ROS_INSTALL_DIR}
+    # sudo chown $USER ${ROS_INSTALL_DIR}
   fi
 
   # Parallel build.
   catkin config --install  --install-space ${ROS_INSTALL_DIR} --cmake-args \
+    -DCMAKE_FIND_FRAMEWORK=LAST \
     -DCATKIN_ENABLE_TESTING=1 \
     -DCMAKE_BUILD_TYPE=Release \
     -DPYTHON_LIBRARY=$(python -c "import sys; print sys.prefix")/lib/libpython2.7.dylib \
